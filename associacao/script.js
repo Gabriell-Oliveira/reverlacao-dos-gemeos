@@ -107,7 +107,7 @@ function selecionarCard(card, item) {
     return;
   }
   
-  // Se clicou em duas cartas do mesmo tipo (ambas descrições ou ambos livros)
+  // Se clicou em duas cartas do mesmo tipo
   if (cartaSelecionada.card.dataset.tipo === card.dataset.tipo) {
     cartaSelecionada.card.classList.remove("selected");
     cartaSelecionada = { card, item };
@@ -117,10 +117,8 @@ function selecionarCard(card, item) {
   
   // Verificar se é a associação correta
   if (cartaSelecionada.item.id === item.id) {
-    // ACERTOU! ✓
     acertoCorreto(card);
   } else {
-    // ERROU! ✗
     erroIncorreto(card);
   }
 }
@@ -129,12 +127,10 @@ function selecionarCard(card, item) {
 function acertoCorreto(segundaCard) {
   const primeiraCard = cartaSelecionada.card;
   
-  // Marcar como matched
   primeiraCard.classList.add("matched");
   segundaCard.classList.add("matched");
   primeiraCard.classList.remove("selected");
   
-  // Desenhar linha verde permanente
   desenharLinha(primeiraCard, segundaCard, "correct", true);
   
   acertos++;
@@ -151,23 +147,17 @@ function acertoCorreto(segundaCard) {
 function erroIncorreto(segundaCard) {
   const primeiraCard = cartaSelecionada.card;
   
-  // Desenhar linha vermelha temporária
   desenharLinha(primeiraCard, segundaCard, "wrong", false);
-  
-  // Remover seleção
   primeiraCard.classList.remove("selected");
   cartaSelecionada = null;
   
-  // Perder vida
   vidas--;
   atualizarStats();
   
-  // Remover linha vermelha após 800ms
   setTimeout(() => {
     removerLinhasErradas();
   }, 800);
   
-  // Verificar se perdeu
   if (vidas === 0) {
     setTimeout(mostrarDerrota, 1000);
   }
@@ -179,13 +169,11 @@ function desenharLinha(card1, card2, tipo, permanente) {
   const rect2 = card2.getBoundingClientRect();
   const svgRect = svgLines.getBoundingClientRect();
   
-  // Calcular posições relativas ao SVG
   const x1 = rect1.right - svgRect.left;
   const y1 = rect1.top + rect1.height / 2 - svgRect.top;
   const x2 = rect2.left - svgRect.left;
   const y2 = rect2.top + rect2.height / 2 - svgRect.top;
   
-  // Criar linha SVG
   const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
   line.setAttribute("x1", x1);
   line.setAttribute("y1", y1);
@@ -208,41 +196,32 @@ function removerLinhasErradas() {
 
 // ========== FUNÇÃO: ATUALIZAR ESTATÍSTICAS ==========
 function atualizarStats() {
-  // Atualizar vidas
   const coracoes = "💚".repeat(vidas) + "🖤".repeat(3 - vidas);
   vidasEl.textContent = coracoes;
   
-  // Atualizar acertos
   acertosEl.textContent = `${acertos} / ${associacoes.length}`;
   
-  // Atualizar barra de progresso
   const progresso = (acertos / associacoes.length) * 100;
   progressEl.style.width = `${progresso}%`;
 }
 
-// ========== FUNÇÃO: MOSTRAR VITÓRIA (CORRIGIDA) ==========
+// ========== FUNÇÃO: MOSTRAR VITÓRIA (SEM ALERT!) ==========
 function mostrarVitoria() {
   jogoAtivo = false;
   mensagemEl.textContent = `🏆 PARABÉNS! Você completou com ${3 - vidas} erro(s)!`;
   mensagemEl.className = "message win";
   
-  // Desabilitar todas as cartas
   document.querySelectorAll(".card").forEach(card => {
     card.classList.add("disabled");
   });
   
-  // Salvar progresso (Peça 2 conquistada, próximo desafio é o 3)
+  // Salvar progresso
   localStorage.setItem('pecasConquistadas', '2');
-  localStorage.setItem('desafioAtual', '3'); // ← CORRIGIDO!
+  localStorage.setItem('desafioAtual', '3');
   
-  // Avançar para próximo desafio após 3 segundos
+  // Redirecionar para página da peça 2 após 2 segundos
   setTimeout(() => {
-    const avancar = confirm('🎉 Peça #2 conquistada!\n\n🧩 Ir para o Desafio 3 (Quiz Relâmpago)?');
-    if (avancar) {
-      window.location.href = '../quiz/index.html';
-    } else {
-      window.location.href = '../index.html';
-    }
+    window.location.href = '../pecas/peca-conquistada.html?peca=2';
   }, 2000);
 }
 
@@ -252,7 +231,6 @@ function mostrarDerrota() {
   mensagemEl.textContent = `💀 Você perdeu todas as vidas! Tente novamente.`;
   mensagemEl.className = "message lose";
   
-  // Desabilitar todas as cartas
   document.querySelectorAll(".card").forEach(card => {
     card.classList.add("disabled");
   });
@@ -269,13 +247,11 @@ function reiniciarJogo() {
   mensagemEl.textContent = "";
   mensagemEl.className = "message";
   
-  // Limpar linhas
   svgLines.innerHTML = "";
   
   atualizarStats();
   criarTabuleiro();
   
-  // Animar entrada dos cards
   setTimeout(() => {
     const cards = document.querySelectorAll('.card');
     cards.forEach((card, index) => {
@@ -296,7 +272,6 @@ window.addEventListener("DOMContentLoaded", () => {
   criarTabuleiro();
   atualizarStats();
   
-  // Animar entrada dos cards
   setTimeout(() => {
     const cards = document.querySelectorAll('.card');
     cards.forEach((card, index) => {

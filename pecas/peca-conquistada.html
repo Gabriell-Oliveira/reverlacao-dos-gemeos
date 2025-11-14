@@ -13,7 +13,7 @@
     <div class="success-icon">🎉</div>
     
     <h1 class="title">PARABÉNS!</h1>
-    <p class="subtitle">Você conquistou a peça <span id="peca-numero">1</span> de 4!</p>
+    <p class="subtitle">Você conquistou a <span class="peca-destaque">Peça <span id="peca-numero">1</span></span> de 4!</p>
 
     <!-- Peça do Quebra-Cabeça (preta com número) -->
     <div class="puzzle-piece-container">
@@ -27,10 +27,18 @@
     <div class="progress-container">
       <div class="progress-text">Progresso da Aventura</div>
       <div class="pieces-collected">
-        <div class="mini-piece collected" data-piece="1">1</div>
-        <div class="mini-piece locked" data-piece="2">2</div>
-        <div class="mini-piece locked" data-piece="3">3</div>
-        <div class="mini-piece locked" data-piece="4">4</div>
+        <div class="mini-piece locked" data-piece="1">
+          <span class="mini-number">1</span>
+        </div>
+        <div class="mini-piece locked" data-piece="2">
+          <span class="mini-number">2</span>
+        </div>
+        <div class="mini-piece locked" data-piece="3">
+          <span class="mini-number">3</span>
+        </div>
+        <div class="mini-piece locked" data-piece="4">
+          <span class="mini-number">4</span>
+        </div>
       </div>
       <div class="progress-bar">
         <div class="progress-fill" id="progress-fill"></div>
@@ -44,8 +52,11 @@
 
     <!-- Botão Continuar -->
     <button class="continue-button" id="continue-btn" onclick="proximoDesafio()">
-      🚀 Continuar Aventura
+      ➡️ Ir para Desafio 2
     </button>
+
+    <!-- Link para voltar ao menu -->
+    <a href="../index.html" class="back-link">↩️ Voltar ao Menu</a>
   </div>
 
   <script src="peca-script.js"></script>

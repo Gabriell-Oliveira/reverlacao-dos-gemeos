@@ -3,32 +3,32 @@ const santos = [
   { 
     id: 1, 
     nome: "Padre Pio", 
-    imagem: "../imagens/padre-pio.png" 
+    imagem: "../imagens/padre-pio.jpg" 
   },
   { 
     id: 2, 
     nome: "Santa Teresinha", 
-    imagem: "../imagens/santa-teresinha.png" 
+    imagem: "../imagens/santa-teresinha.jpg" 
   },
   { 
     id: 3, 
     nome: "São José", 
-    imagem: "../imagens/sao-jose.png" 
+    imagem: "../imagens/sao-jose.jpg" 
   },
   { 
     id: 4, 
     nome: "São João Paulo II", 
-    imagem: "../imagens/sao-joao-paulo-ii.png" 
+    imagem: "../imagens/sao-joao-paulo-ii.jpg" 
   },
   { 
     id: 5, 
     nome: "São Francisco de Assis", 
-    imagem: "../imagens/sao-francisco.png" 
+    imagem: "../imagens/sao-francisco.jpg" 
   },
   { 
     id: 6, 
     nome: "Santa Clara de Assis", 
-    imagem: "../imagens/santa-clara.png" 
+    imagem: "../imagens/santa-clara.jpg" 
   }
 ];
 
@@ -86,25 +86,25 @@ function criarTabuleiro() {
   });
 }
 
-// ========== FUNÇÃO: VIRAR CARTA (CORRIGIDA!) ==========
+// ========== FUNÇÃO: VIRAR CARTA ==========
 function virarCarta(carta, santo) {
   // Verificar se pode virar
   if (bloqueado) return;
   if (carta.classList.contains("virada")) return;
   if (carta.classList.contains("matched")) return;
 
-  // Virar carta (SEMPRE gira ao clicar!)
+  // Virar carta
   carta.classList.add("virada");
 
   // Primeira carta
   if (!primeiraCarta) {
     primeiraCarta = { carta, santo };
-    return; // Para aqui, aguardando segunda carta
+    return;
   }
 
   // Segunda carta
   segundaCarta = { carta, santo };
-  bloqueado = true; // Bloqueia novas seleções
+  bloqueado = true;
   tentativas++;
   atualizarStats();
 
@@ -112,11 +112,8 @@ function virarCarta(carta, santo) {
   if (primeiraCarta.santo.id === segundaCarta.santo.id) {
     // PAR CORRETO! ✓
     setTimeout(() => {
-      // IMPORTANTE: Adicionar classe matched MANTÉM a carta virada!
       primeiraCarta.carta.classList.add("matched");
       segundaCarta.carta.classList.add("matched");
-      
-      // Remover classe virada (não é mais necessária, matched já deixa virada)
       primeiraCarta.carta.classList.remove("virada");
       segundaCarta.carta.classList.remove("virada");
       
@@ -134,13 +131,11 @@ function virarCarta(carta, santo) {
     setTimeout(() => {
       primeiraCarta.carta.classList.add("wrong");
       segundaCarta.carta.classList.add("wrong");
-
-      setTimeout(() => {
-        // Remover todas as classes para voltar ao estado inicial
+       setTimeout(() => {
         primeiraCarta.carta.classList.remove("virada", "wrong");
         segundaCarta.carta.classList.remove("virada", "wrong");
         resetarCartas();
-      }, 2500);
+      }, 1000);
     }, 600);
   }
 }
@@ -162,26 +157,20 @@ function atualizarStats() {
   progressEl.style.width = `${progresso}%`;
 }
 
-// ========== FUNÇÃO: MOSTRAR VITÓRIA (CORRIGIDA) ==========
+// ========== FUNÇÃO: MOSTRAR VITÓRIA (SEM ALERT!) ==========
 function mostrarVitoria() {
   mensagemEl.textContent = `🏆 PARABÉNS! Você completou em ${tentativas} tentativas!`;
   mensagemEl.className = "message win";
 
-  // Salvar progresso (Peça 1 conquistada, próximo desafio é o 2)
+  // Salvar progresso
   localStorage.setItem('pecasConquistadas', '1');
-  localStorage.setItem('desafioAtual', '2'); // ← CORRIGIDO!
+  localStorage.setItem('desafioAtual', '2');
 
-  // Avançar para próximo desafio após 3 segundos
+  // Redirecionar para página da peça 1 após 2 segundos
   setTimeout(() => {
-    const avancar = confirm('🎉 Peça #1 conquistada!\n\n🧩 Ir para o Desafio 2 (Associação)?');
-    if (avancar) {
-      window.location.href = '../associacao/index.html';
-    } else {
-      window.location.href = '../index.html';
-    }
+    window.location.href = '../pecas/peca-conquistada.html?peca=1';
   }, 2000);
 }
-
 
 // ========== FUNÇÃO: REINICIAR JOGO ==========
 function reiniciarJogo() {

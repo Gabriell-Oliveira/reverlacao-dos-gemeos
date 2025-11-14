@@ -61,25 +61,35 @@ function iniciarAventura() {
   const { pecasConquistadas } = carregarProgresso();
   
   if (pecasConquistadas > 0) {
-    // Confirmar se quer recomeçar
-    const confirmar = confirm(
-      '⚠️ ATENÇÃO!\n\n' +
-      `Você já completou ${pecasConquistadas} desafio(s).\n\n` +
-      'Deseja RECOMEÇAR do início? (Seu progresso será perdido)\n\n' +
-      'Clique em CANCELAR para continuar de onde parou.'
-    );
+    // Se já tem progresso, mostrar aviso visual
+    const startBtn = document.querySelector('.start-button');
+    startBtn.style.background = 'linear-gradient(135deg, #FF6B6B, #F44336)';
+    startBtn.textContent = '⚠️ Resetando em 3...';
     
-    if (!confirmar) {
-      continuarAventura();
-      return;
-    }
+    let countdown = 3;
+    const countdownInterval = setInterval(() => {
+      countdown--;
+      if (countdown > 0) {
+        startBtn.textContent = `⚠️ Resetando em ${countdown}...`;
+      } else {
+        clearInterval(countdownInterval);
+        // Resetar progresso
+        localStorage.setItem('pecasConquistadas', '0');
+        localStorage.setItem('desafioAtual', '1');
+        
+        startBtn.textContent = 'Carregando...';
+        startBtn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+        
+        setTimeout(() => {
+          window.location.href = DESAFIOS[0].url;
+        }, 500);
+      }
+    }, 1000);
     
-    // Resetar progresso
-    localStorage.setItem('pecasConquistadas', '0');
-    localStorage.setItem('desafioAtual', '1');
+    return;
   }
   
-  // Animação de transição
+  // Se não tem progresso, iniciar diretamente
   const btn = document.querySelector('.start-button');
   btn.textContent = 'Preparando desafios...';
   btn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
@@ -95,7 +105,6 @@ function continuarAventura() {
   
   if (pecasConquistadas >= 4) {
     // Já completou tudo, ir para mensagem bíblica
-    alert('🎉 Você já completou todos os desafios!\n\n📖 Indo para a mensagem final...');
     window.location.href = 'mensagem-biblica.html';
     return;
   }
@@ -104,31 +113,32 @@ function continuarAventura() {
   const proximoDesafio = DESAFIOS[desafioAtual - 1];
   
   if (proximoDesafio) {
-    alert(
-      `🎮 Continuando Aventura!\n\n` +
-      `Peças conquistadas: ${pecasConquistadas}/4\n` +
-      `Próximo desafio: ${proximoDesafio.nome}\n\n` +
-      `Boa sorte! ${proximoDesafio.icone}`
-    );
+    const continueBtn = document.querySelector('.continue-button');
+    continueBtn.textContent = `Carregando ${proximoDesafio.nome}...`;
+    continueBtn.style.background = 'linear-gradient(135deg, #4ECDC4, #44A08D)';
     
-    window.location.href = proximoDesafio.url;
+    setTimeout(() => {
+      window.location.href = proximoDesafio.url;
+    }, 800);
   }
 }
 
-// ========== RESETAR PROGRESSO (DEBUG) ==========
+// ========== RESETAR PROGRESSO ==========
 function resetarProgresso() {
-  const confirmar = confirm(
-    '⚠️ RESETAR TUDO?\n\n' +
-    'Isso apagará TODO o seu progresso.\n\n' +
-    'Tem certeza?'
-  );
+  const resetBtn = document.querySelector('.reset-button');
+  resetBtn.style.background = 'rgba(255, 107, 107, 0.3)';
+  resetBtn.textContent = '⏳ Resetando...';
   
-  if (confirmar) {
+  setTimeout(() => {
     localStorage.removeItem('pecasConquistadas');
     localStorage.removeItem('desafioAtual');
-    alert('✅ Progresso resetado!\n\nRecarregando página...');
-    location.reload();
-  }
+    
+    resetBtn.textContent = '✅ Resetado!';
+    
+    setTimeout(() => {
+      location.reload();
+    }, 800);
+  }, 500);
 }
 
 // ========== ANIMAÇÃO DOS ÍCONES ==========

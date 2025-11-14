@@ -1,20 +1,30 @@
 // ========== CONFIGURAÇÃO DOS DESAFIOS ==========
 const desafios = [
-  { nome: "Jogo da Memória", proximo: "associacao/index.html" },
-  { nome: "Associação", proximo: "quiz/index.html" },
-  { nome: "Quiz Relâmpago", proximo: "caca-palavras/index.html" },
-  { nome: "Caça-Palavras", proximo: "mensagem-biblica.html" }
+  { 
+    nome: "Jogo da Memória", 
+    proximo: "../associacao/index.html",
+    mensagem: "Continue assim! Cada peça te aproxima da grande revelação! ✨"
+  },
+  { 
+    nome: "Associação", 
+    proximo: "../quiz/index.html",
+    mensagem: "Você está indo muito bem! Metade do caminho já foi percorrido! 🌟"
+  },
+  { 
+    nome: "Quiz Relâmpago", 
+    proximo: "../caca-palavras/index.html",
+    mensagem: "Incrível! Falta apenas uma peça para descobrir o mistério! 🎯"
+  },
+  { 
+    nome: "Caça-Palavras", 
+    proximo: "../mensagem-biblica.html",  // Preparado para futura página
+    mensagem: "Última peça conquistada! Prepare-se para a revelação final! 🎊"
+  }
 ];
 
-const mensagensMotivacionais = [
-  "Continue assim! Cada peça te aproxima da grande revelação! ✨",
-  "Você está indo muito bem! Metade do caminho já foi percorrido! 🌟",
-  "Incrível! Falta apenas uma peça para descobrir o mistério! 🎯",
-  "Última peça conquistada! Prepare-se para a revelação final! 🎊"
-];
-
-// ========== OBTER PEÇA ATUAL DO LOCALSTORAGE ==========
-let pecaAtual = parseInt(localStorage.getItem('pecasConquistadas') || '1');
+// ========== OBTER NÚMERO DA PEÇA DA URL ==========
+const urlParams = new URLSearchParams(window.location.search);
+let pecaAtual = parseInt(urlParams.get('peca')) || 1;
 
 // Garantir que está entre 1 e 4
 if (pecaAtual < 1) pecaAtual = 1;
@@ -40,11 +50,16 @@ function atualizarInterface() {
   document.getElementById('progress-fill').style.width = `${progresso}%`;
 
   // Atualizar mensagem motivacional
-  document.getElementById('motivational-message').textContent = mensagensMotivacionais[pecaAtual - 1];
+  const desafioAtual = desafios[pecaAtual - 1];
+  document.getElementById('motivational-message').textContent = desafioAtual.mensagem;
 
-  // Atualizar texto do botão se for a última peça
+  // Atualizar texto do botão
+  const botao = document.getElementById('continue-btn');
   if (pecaAtual === 4) {
-    document.getElementById('continue-btn').innerHTML = '📖 Ver Mensagem Especial';
+    botao.innerHTML = '📖 Ver Mensagem Especial';
+  } else {
+    const proximoNumero = pecaAtual + 1;
+    botao.innerHTML = `➡️ Ir para Desafio ${proximoNumero}`;
   }
 }
 
@@ -85,30 +100,21 @@ function criarConfetes() {
 // ========== FUNÇÃO: IR PARA PRÓXIMO DESAFIO ==========
 function proximoDesafio() {
   const indice = pecaAtual - 1;
+  const desafioAtual = desafios[indice];
   
-  if (indice < desafios.length) {
-    // Adicionar efeito de transição
-    document.querySelector('.container').style.opacity = '0';
-    document.querySelector('.container').style.transform = 'scale(0.95)';
-    
-    setTimeout(() => {
-      window.location.href = desafios[indice].proximo;
-    }, 300);
-  }
-}
-
-// ========== SOM DE VITÓRIA (OPCIONAL) ==========
-function tocarSomVitoria() {
-  // Se você tiver um arquivo de som, pode adicionar aqui
-  // const audio = new Audio('sons/vitoria.mp3');
-  // audio.play();
+  // Adicionar efeito de transição
+  document.querySelector('.container').style.opacity = '0';
+  document.querySelector('.container').style.transform = 'scale(0.95)';
+  
+  setTimeout(() => {
+    window.location.href = desafioAtual.proximo;
+  }, 300);
 }
 
 // ========== INICIALIZAR ==========
 window.addEventListener('DOMContentLoaded', () => {
   atualizarInterface();
   criarConfetes();
-  tocarSomVitoria();
 
   // Animação extra na peça
   setTimeout(() => {

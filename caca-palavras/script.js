@@ -3,7 +3,8 @@ const palavras = [
   { palavra: "APOSTOLO", posicao: { linha: 1, coluna: 1, direcao: "diagonal" } },
   { palavra: "PESCADOR", posicao: { linha: 0, coluna: 2, direcao: "horizontal" } },
   { palavra: "PAPA", posicao: { linha: 1, coluna: 8, direcao: "vertical" } },
-  { palavra: "IMPULSIVO", posicao: { linha: 8, coluna: 0, direcao: "horizontal" } }
+  { palavra: "IMPULSIVO", posicao: { linha: 8, coluna: 0, direcao: "horizontal" } },
+  { palavra: "PEDRO", posicao: { linha: 3, coluna: 2, direcao: "vertical" } }
 ];
 
 const GRID_SIZE = 10;
@@ -81,12 +82,10 @@ function renderizarGrade() {
       celula.dataset.linha = i;
       celula.dataset.coluna = j;
 
-      // Eventos de mouse
       celula.addEventListener("mousedown", iniciarSelecao);
       celula.addEventListener("mouseenter", continuarSelecao);
       celula.addEventListener("mouseup", finalizarSelecao);
 
-      // Eventos de toque (mobile)
       celula.addEventListener("touchstart", iniciarSelecaoTouch);
       celula.addEventListener("touchmove", continuarSelecaoTouch);
       celula.addEventListener("touchend", finalizarSelecao);
@@ -149,25 +148,20 @@ function finalizarSelecao() {
   if (!selecionandoPalavra) return;
   selecionandoPalavra = false;
 
-  // Extrair palavra selecionada
   const palavraSelecionada = celulasTemporarias
     .map(c => c.textContent)
     .join("");
 
-  // Verificar se é uma palavra válida
   const palavraEncontrada = palavras.find(p => p.palavra === palavraSelecionada);
 
   if (palavraEncontrada && !palavrasEncontradas.includes(palavraSelecionada)) {
-    // PALAVRA ENCONTRADA! ✓
     palavrasEncontradas.push(palavraSelecionada);
     
-    // Marcar células como encontradas
     celulasTemporarias.forEach(c => {
       c.classList.remove("selecting");
       c.classList.add("found");
     });
 
-    // Marcar palavra na lista
     const wordItem = document.querySelector(`[data-word="${palavraSelecionada}"]`);
     if (wordItem) {
       wordItem.classList.add("found");
@@ -175,12 +169,15 @@ function finalizarSelecao() {
 
     atualizarStats();
 
-    // Verificar vitória
+    if (palavrasEncontradas.length === 4) {
+      alert("Você encontrou as 4 primeiras palavras! Agora descubra a 😶‍🌫️PALAVRA SECRETA😶‍🌫️ para conquistar a peça final!");
+      alert("DICA: A palavra secreta é a pessoa que possi todas essas características mencionadas nas palavras anteriores.");
+    }
+
     if (palavrasEncontradas.length === palavras.length) {
       setTimeout(mostrarVitoria, 500);
     }
   } else {
-    // Palavra não encontrada ou já encontrada
     celulasTemporarias.forEach(c => {
       c.classList.remove("selecting");
     });
@@ -197,23 +194,18 @@ function atualizarStats() {
   progressEl.style.width = `${progresso}%`;
 }
 
-// ========== FUNÇÃO: MOSTRAR VITÓRIA (CORRIGIDA) ==========
+// ========== FUNÇÃO: MOSTRAR VITÓRIA (SEM ALERT!) ==========
 function mostrarVitoria() {
   mensagemEl.textContent = "🏆 PARABÉNS! Você encontrou todas as palavras!";
   mensagemEl.className = "message win";
 
-  // Salvar progresso (Peça 4 conquistada - FIM!)
+  // Salvar progresso
   localStorage.setItem('pecasConquistadas', '4');
-  localStorage.setItem('desafioAtual', '4'); // Permanece 4 (último desafio)
+  localStorage.setItem('desafioAtual', '4');
 
-  // Avançar para mensagem bíblica após 2 segundos
+  // Redirecionar para página da peça 4 após 2 segundos
   setTimeout(() => {
-    const avancar = confirm('🎉 Última peça conquistada!\n\n📖 Ir para a mensagem especial?');
-    if (avancar) {
-      window.location.href = '../mensagem-biblica.html';
-    } else {
-      window.location.href = '../index.html';
-    }
+    window.location.href = '../pecas/peca-conquistada.html?peca=4';
   }, 2000);
 }
 
@@ -232,7 +224,6 @@ function reiniciarJogo() {
   renderizarGrade();
   atualizarStats();
 
-  // Resetar lista de palavras
   document.querySelectorAll(".word-item").forEach(item => {
     item.classList.remove("found");
   });
@@ -246,7 +237,6 @@ window.addEventListener("DOMContentLoaded", () => {
   renderizarGrade();
   atualizarStats();
 
-  // Prevenir seleção de texto
   document.addEventListener("selectstart", (e) => {
     if (e.target.classList.contains("grid-cell")) {
       e.preventDefault();

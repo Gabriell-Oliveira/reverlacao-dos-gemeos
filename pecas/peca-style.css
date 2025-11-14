@@ -19,7 +19,6 @@ body {
   position: relative;
 }
 
-/* ========== CONFETES ========== */
 .confetti {
   position: fixed;
   top: 0;
@@ -30,7 +29,6 @@ body {
   z-index: 1;
 }
 
-/* ========== CONTAINER PRINCIPAL ========== */
 .container {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(15px);
@@ -44,6 +42,7 @@ body {
   position: relative;
   z-index: 2;
   animation: slideUp 0.6s ease-out;
+  transition: all 0.3s ease;
 }
 
 @keyframes slideUp {
@@ -57,7 +56,6 @@ body {
   }
 }
 
-/* ========== ÍCONE DE SUCESSO ========== */
 .success-icon {
   font-size: 5rem;
   margin-bottom: 1rem;
@@ -69,7 +67,6 @@ body {
   50% { transform: translateY(-20px); }
 }
 
-/* ========== TÍTULO ========== */
 .title {
   font-family: 'Fredoka One', cursive;
   font-size: 3rem;
@@ -78,7 +75,6 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
   animation: glow 2s ease-in-out infinite alternate;
 }
 
@@ -94,13 +90,12 @@ body {
   font-weight: 400;
 }
 
-.subtitle span {
+.peca-destaque {
   font-weight: 700;
   color: #4ECDC4;
   font-size: 1.5rem;
 }
 
-/* ========== PEÇA DO QUEBRA-CABEÇA ========== */
 .puzzle-piece-container {
   display: flex;
   justify-content: center;
@@ -123,6 +118,7 @@ body {
   position: relative;
   animation: pieceAppear 0.8s ease-out 0.3s both,
              piecePulse 2s ease-in-out 1.1s infinite;
+  transition: transform 0.3s ease;
 }
 
 @keyframes pieceAppear {
@@ -153,7 +149,6 @@ body {
   opacity: 0.7;
 }
 
-/* ========== PROGRESSO ========== */
 .progress-container {
   background: rgba(255, 255, 255, 0.15);
   border-radius: 15px;
@@ -187,6 +182,12 @@ body {
   font-weight: 700;
   border: 3px solid rgba(255, 255, 255, 0.3);
   transition: all 0.3s ease;
+  background: rgba(50, 50, 50, 0.5);
+  opacity: 0.5;
+}
+
+.mini-number {
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .mini-piece.collected {
@@ -194,18 +195,17 @@ body {
   border-color: #4CAF50;
   box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
   animation: miniPieceCollect 0.6s ease-out;
+  opacity: 1;
+}
+
+.mini-piece.collected .mini-number {
+  color: white;
 }
 
 @keyframes miniPieceCollect {
   0% { transform: scale(0) rotate(-90deg); }
   50% { transform: scale(1.2) rotate(10deg); }
   100% { transform: scale(1) rotate(0deg); }
-}
-
-.mini-piece.locked {
-  background: rgba(50, 50, 50, 0.5);
-  border-color: rgba(255, 255, 255, 0.2);
-  opacity: 0.5;
 }
 
 .progress-bar {
@@ -223,9 +223,9 @@ body {
   border-radius: 10px;
   transition: width 1s ease-out 0.5s;
   box-shadow: 0 0 15px rgba(78, 205, 196, 0.6);
+  width: 0%;
 }
 
-/* ========== MENSAGEM MOTIVACIONAL ========== */
 .message-box {
   background: rgba(255, 215, 0, 0.15);
   border: 2px solid rgba(255, 215, 0, 0.4);
@@ -244,7 +244,6 @@ body {
   to { opacity: 1; }
 }
 
-/* ========== BOTÃO CONTINUAR ========== */
 .continue-button {
   background: linear-gradient(45deg, #4CAF50, #45a049);
   border: none;
@@ -261,6 +260,9 @@ body {
   position: relative;
   overflow: hidden;
   animation: fadeIn 0.8s ease-out 0.8s both;
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
 }
 
 .continue-button:hover {
@@ -287,7 +289,24 @@ body {
   left: 100%;
 }
 
-/* ========== RESPONSIVO ========== */
+.back-link {
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+  animation: fadeIn 0.8s ease-out 1s both;
+}
+
+.back-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  transform: translateY(-2px);
+}
+
 @media (max-width: 768px) {
   .title {
     font-size: 2.2rem;
