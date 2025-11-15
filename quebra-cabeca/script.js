@@ -1,17 +1,146 @@
 // ========== VARIÁVEIS DO JOGO ==========
 let pecasEncaixadas = 0;
 const TOTAL_PECAS = 4;
+let imagemCarregada = false;
+let pecasData = []; // Armazena os dados das peças recortadas
 
 const pecasEncaixadasEl = document.getElementById('pecas-encaixadas');
 const statusMessageEl = document.getElementById('status-message');
 const confettiContainer = document.getElementById('confetti');
+const puzzleBoard = document.getElementById('puzzle-board');
+const finalReveal = document.getElementById('final-reveal');
 
-// Som de encaixe (beep simples com Web Audio API)
+// Som de encaixe
 let audioContext;
 try {
   audioContext = new (window.AudioContext || window.webkitAudioContext)();
 } catch (e) {
   console.log('Web Audio API não suportada');
+}
+
+// ========== CARREGAR E PROCESSAR IMAGEM ==========
+function carregarImagemERecortar() {
+  const img = new Image();
+  img.crossOrigin = "anonymous"; // Para evitar problemas de CORS
+  
+  img.onload = function() {
+    const canvas = document.getElementById('image-processor');
+    const ctx = canvas.getContext('2d');
+    
+    // Definir tamanho do canvas igual à imagem
+    canvas.width = img.width;
+    canvas.height = img.height;
+    
+    // Desenhar imagem completa
+    ctx.drawImage(img, 0, 0);
+    
+    // Calcular dimensões de cada peça (2x2)
+    const pieceWidth = img.width / 2;
+    const pieceHeight = img.height / 2;
+    
+    // Recortar e armazenar cada peça
+    const posicoes = [
+      { pos: 1, x: 0, y: 0 }, // Superior esquerdo
+      { pos: 2, x: pieceWidth, y: 0 }, // Superior direito
+      { pos: 3, x: 0, y: pieceHeight }, // Inferior esquerdo
+      { pos: 4, x: pieceWidth, y: pieceHeight } // Inferior direito
+    ];
+    
+    posicoes.forEach(({ pos, x, y }) => {
+      // Criar canvas temporário para cada peça
+      const pieceCanvas = document.createElement('canvas');
+      pieceCanvas.width = pieceWidth;
+      pieceCanvas.height = pieceHeight;
+      const pieceCtx = pieceCanvas.getContext('2d');
+      
+      // Recortar a peça
+      pieceCtx.drawImage(
+        canvas,
+        x, y, pieceWidth, pieceHeight, // área de origem
+        0, 0, pieceWidth, pieceHeight  // área de destino
+      );
+      
+      // Converter para data URL
+      const dataURL = pieceCanvas.toDataURL('image/png');
+      
+      pecasData.push({
+        posicao: pos,
+        imagem: dataURL,
+        x: x,
+        y: y,
+        width: pieceWidth,
+        height: pieceHeight
+      });
+    });
+    
+    imagemCarregada = true;
+    criarPecasEmbaralhadas();
+  };
+  
+  img.onerror = function() {
+    console.error('Erro ao carregar imagem. Usando fallback...');
+    criarPecasFallback();
+  };
+  
+  img.src = '../imagens/bebes.png';
+}
+
+// ========== CRIAR PEÇAS EMBARALHADAS ==========
+function criarPecasEmbaralhadas() {
+  const container = document.getElementById('pieces-container');
+  container.innerHTML = '';
+  
+  // Embaralhar as peças
+  const pecasEmbaralhadas = [...pecasData].sort(() => Math.random() - 0.5);
+  
+  pecasEmbaralhadas.forEach((peca, index) => {
+    const divPeca = document.createElement('div');
+    divPeca.className = 'puzzle-piece';
+    divPeca.draggable = true;
+    divPeca.dataset.piece = peca.posicao;
+    
+    divPeca.innerHTML = `
+      <div class="piece-content">
+        <span class="piece-number-display">${peca.posicao}</span>
+      </div>
+    `;
+    
+    divPeca.addEventListener('dragstart', drag);
+    container.appendChild(divPeca);
+    
+    // Animação de entrada
+    setTimeout(() => {
+      divPeca.style.opacity = '1';
+      divPeca.style.transform = 'scale(1)';
+    }, 200 + (index * 150));
+  });
+}
+
+// ========== CRIAR PEÇAS FALLBACK (SE IMAGEM NÃO CARREGAR) ==========
+function criarPecasFallback() {
+  const container = document.getElementById('pieces-container');
+  container.innerHTML = '';
+  
+  for (let i = 1; i <= 4; i++) {
+    const divPeca = document.createElement('div');
+    divPeca.className = 'puzzle-piece';
+    divPeca.draggable = true;
+    divPeca.dataset.piece = i;
+    
+    divPeca.innerHTML = `
+      <div class="piece-content">
+        <span class="piece-number-display">${i}</span>
+      </div>
+    `;
+    
+    divPeca.addEventListener('dragstart', drag);
+    container.appendChild(divPeca);
+    
+    setTimeout(() => {
+      divPeca.style.opacity = '1';
+      divPeca.style.transform = 'scale(1)';
+    }, 200 + ((i-1) * 150));
+  }
 }
 
 function tocarSomEncaixe() {
@@ -36,7 +165,7 @@ function tocarSomEncaixe() {
 function tocarSomVitoria() {
   if (!audioContext) return;
   
-  const notas = [523.25, 659.25, 783.99, 1046.50]; // Dó, Mi, Sol, Dó (oitava acima)
+  const notas = [523.25, 659.25, 783.99, 1046.50];
   
   notas.forEach((freq, index) => {
     const oscillator = audioContext.createOscillator();
@@ -60,7 +189,10 @@ function tocarSomVitoria() {
 // ========== FUNÇÕES DE DRAG & DROP ==========
 function allowDrop(event) {
   event.preventDefault();
-  event.target.closest('.puzzle-slot').classList.add('drag-over');
+  const slot = event.target.closest('.puzzle-slot');
+  if (slot && !slot.classList.contains('filled')) {
+    slot.classList.add('drag-over');
+  }
 }
 
 function drag(event) {
@@ -72,64 +204,71 @@ function drop(event) {
   event.preventDefault();
   
   const slot = event.target.closest('.puzzle-slot');
+  if (!slot) return;
+  
   slot.classList.remove('drag-over');
   
-  // Verificar se já está preenchido
-  if (slot.classList.contains('filled')) {
-    return;
-  }
+  if (slot.classList.contains('filled')) return;
   
-  const pieceNumber = event.dataTransfer.getData('piece');
-  const slotPosition = slot.dataset.pos;
+  const pieceNumber = parseInt(event.dataTransfer.getData('piece'));
+  const slotPosition = parseInt(slot.dataset.pos);
   
-  // Verificar se é a posição correta
   if (pieceNumber === slotPosition) {
     encaixarPeca(slot, pieceNumber);
   } else {
-    // Feedback de erro (shake)
-    slot.style.animation = 'none';
+    slot.style.animation = 'shake 0.5s ease';
     setTimeout(() => {
-      slot.style.animation = 'shake 0.5s ease';
-    }, 10);
+      slot.style.animation = '';
+    }, 500);
   }
 }
 
 // ========== ENCAIXAR PEÇA ==========
 function encaixarPeca(slot, pieceNumber) {
-  // Tocar som de encaixe
   tocarSomEncaixe();
   
   // Ocultar peça original
   const originalPiece = document.querySelector(`.pieces-container .puzzle-piece[data-piece="${pieceNumber}"]`);
   originalPiece.classList.add('hidden');
   
-  // Criar peça no slot
+  // Encontrar dados da peça
+  const dadosPeca = pecasData.find(p => p.posicao === pieceNumber);
+  
+  // Criar peça no slot com imagem
   const newPiece = document.createElement('div');
-  newPiece.className = 'puzzle-piece';
-  newPiece.innerHTML = `
-    <div class="piece-content">
-      <img src="imagens/peca-${pieceNumber}.jpg" 
-           alt="Peça ${pieceNumber}" 
-           style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;"
-           onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\'piece-number-display\'>${pieceNumber}</span>'">
-    </div>
-  `;
+  newPiece.className = 'puzzle-piece filled-piece';
+  
+  if (dadosPeca && imagemCarregada) {
+    newPiece.innerHTML = `
+      <div class="piece-content">
+        <img src="${dadosPeca.imagem}" 
+             alt="Peça ${pieceNumber}" 
+             class="piece-image">
+      </div>
+    `;
+  } else {
+    newPiece.innerHTML = `
+      <div class="piece-content">
+        <span class="piece-number-display">${pieceNumber}</span>
+      </div>
+    `;
+  }
   
   slot.innerHTML = '';
   slot.appendChild(newPiece);
   slot.classList.add('filled');
   
-  // Atualizar contador
+  // Animação de encaixe
+  newPiece.style.animation = 'pieceSnap 0.6s ease-out';
+  
   pecasEncaixadas++;
   atualizarContador();
   
-  // Verificar vitória
   if (pecasEncaixadas === TOTAL_PECAS) {
-    setTimeout(mostrarVitoria, 500);
+    setTimeout(mostrarVitoria, 800);
   }
 }
 
-// ========== ATUALIZAR CONTADOR ==========
 function atualizarContador() {
   pecasEncaixadasEl.textContent = `${pecasEncaixadas} / ${TOTAL_PECAS}`;
   
@@ -139,7 +278,6 @@ function atualizarContador() {
   }
 }
 
-// ========== CRIAR CONFETES ==========
 function criarConfetes() {
   const cores = ['#FFD700', '#FFA500', '#FF6B6B', '#4ECDC4', '#4CAF50', '#FF69B4'];
   
@@ -159,51 +297,56 @@ function criarConfetes() {
   }
 }
 
-// ========== MOSTRAR VITÓRIA ==========
+// ========== MOSTRAR VITÓRIA COM TRANSIÇÃO ==========
 function mostrarVitoria() {
-  // Tocar som de vitória
   tocarSomVitoria();
-  
-  // Criar confetes
   criarConfetes();
   
-  // Mostrar mensagem
   statusMessageEl.textContent = '🎉 PARABÉNS! Você revelou os nomes dos gêmeos! 🎉';
   statusMessageEl.className = 'status-message success';
   
-  // Fazer o tabuleiro brilhar
-  const board = document.querySelector('.puzzle-board');
-  board.style.animation = 'boardGlow 2s ease-in-out infinite';
-  
-  // Adicionar animação de brilho
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes boardGlow {
-      0%, 100% {
-        box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-      }
-      50% {
-        box-shadow: 0 0 60px rgba(255, 215, 0, 0.8);
-      }
-    }
-    
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-10px); }
-      75% { transform: translateX(10px); }
-    }
-  `;
-  document.head.appendChild(style);
-  
-  // Após 3 segundos, mostrar mensagem final
+  // Após 2 segundos, fazer transição para imagem completa
   setTimeout(() => {
-    statusMessageEl.innerHTML = `
-      <div style="text-align: center; line-height: 1.8;">
-        <div style="font-size: 2rem; margin-bottom: 1rem;">👶 ANDRÉ e PEDRO 👶</div>
-        <div style="font-size: 1.2rem;">Os Gêmeos Xavier Calmon</div>
-      </div>
-    `;
-  }, 3000);
+    revelarImagemCompleta();
+  }, 2000);
+}
+
+// ========== REVELAR IMAGEM COMPLETA (REMOVE GRADE) ==========
+function revelarImagemCompleta() {
+  // Fade out do tabuleiro
+  puzzleBoard.style.transition = 'opacity 1.5s ease, transform 1.5s ease';
+  puzzleBoard.style.opacity = '0';
+  puzzleBoard.style.transform = 'scale(0.9)';
+  
+  // Esconder contador e área de peças
+  document.querySelector('.pieces-counter').style.opacity = '0';
+  document.querySelector('.pieces-area').style.opacity = '0';
+  
+  setTimeout(() => {
+    puzzleBoard.style.display = 'none';
+    document.querySelector('.pieces-counter').style.display = 'none';
+    document.querySelector('.pieces-area').style.display = 'none';
+    
+    // Mostrar imagem final completa
+    finalReveal.style.display = 'flex';
+    
+    setTimeout(() => {
+      finalReveal.style.opacity = '1';
+      finalReveal.style.transform = 'scale(1)';
+    }, 100);
+    
+    // Atualizar mensagem
+    setTimeout(() => {
+      statusMessageEl.innerHTML = `
+        <div style="text-align: center; line-height: 1.8;">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem;">👶 ANDRÉ e PEDRO 👶</div>
+          <div style="font-size: 1.3rem; margin-bottom: 0.5rem;">Os Gêmeos Xavier Calmon</div>
+          <div style="font-size: 1rem; opacity: 0.9;">✨ Bem-vindos ao mundo! ✨</div>
+        </div>
+      `;
+    }, 1000);
+    
+  }, 1500);
 }
 
 // ========== REMOVER CLASSE DE DRAGGING ==========
@@ -214,25 +357,14 @@ document.addEventListener('dragend', (event) => {
 });
 
 document.addEventListener('dragleave', (event) => {
-  if (event.target.classList.contains('puzzle-slot')) {
-    event.target.classList.remove('drag-over');
+  const slot = event.target.closest('.puzzle-slot');
+  if (slot) {
+    slot.classList.remove('drag-over');
   }
 });
 
 // ========== INICIALIZAR ==========
 window.addEventListener('DOMContentLoaded', () => {
   atualizarContador();
-  
-  // Animação de entrada das peças
-  const pieces = document.querySelectorAll('.puzzle-piece');
-  pieces.forEach((piece, index) => {
-    piece.style.opacity = '0';
-    piece.style.transform = 'scale(0)';
-    
-    setTimeout(() => {
-      piece.style.transition = 'all 0.6s ease';
-      piece.style.opacity = '1';
-      piece.style.transform = 'scale(1)';
-    }, 200 + (index * 150));
-  });
+  carregarImagemERecortar();
 });

@@ -17,7 +17,7 @@ const desafios = [
   },
   { 
     nome: "Caça-Palavras", 
-    proximo: "../mensagem-biblica.html",  // Preparado para futura página
+    proximo: "../mensagem/index.html",
     mensagem: "Última peça conquistada! Prepare-se para a revelação final! 🎊"
   }
 ];

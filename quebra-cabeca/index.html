@@ -22,52 +22,41 @@
     </div>
 
     <!-- Tabuleiro 2x2 -->
-    <div class="puzzle-board">
+    <div class="puzzle-board" id="puzzle-board">
       <div class="puzzle-slot" data-pos="1" ondrop="drop(event)" ondragover="allowDrop(event)">
         <span class="slot-number">1</span>
       </div>
-      <div class="puzzle-slot" data-pos="3" ondrop="drop(event)" ondragover="allowDrop(event)">
-        <span class="slot-number">3</span>
-      </div>
       <div class="puzzle-slot" data-pos="2" ondrop="drop(event)" ondragover="allowDrop(event)">
         <span class="slot-number">2</span>
+      </div>
+      <div class="puzzle-slot" data-pos="3" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <span class="slot-number">3</span>
       </div>
       <div class="puzzle-slot" data-pos="4" ondrop="drop(event)" ondragover="allowDrop(event)">
         <span class="slot-number">4</span>
       </div>
     </div>
 
+    <!-- Canvas invisível para processar a imagem -->
+    <canvas id="image-processor" style="display: none;"></canvas>
+
     <!-- Área das Peças Disponíveis -->
     <div class="pieces-area">
       <h3 class="pieces-title">🏆 SUAS PEÇAS CONQUISTADAS 🏆</h3>
       <p class="pieces-instruction">Arraste as peças para o tabuleiro</p>
       
-      <div class="pieces-container">
-        <div class="puzzle-piece" draggable="true" ondragstart="drag(event)" data-piece="1">
-          <div class="piece-content">
-            <span class="piece-number-display">1</span>
-          </div>
-        </div>
-        <div class="puzzle-piece" draggable="true" ondragstart="drag(event)" data-piece="2">
-          <div class="piece-content">
-            <span class="piece-number-display">2</span>
-          </div>
-        </div>
-        <div class="puzzle-piece" draggable="true" ondragstart="drag(event)" data-piece="3">
-          <div class="piece-content">
-            <span class="piece-number-display">3</span>
-          </div>
-        </div>
-        <div class="puzzle-piece" draggable="true" ondragstart="drag(event)" data-piece="4">
-          <div class="piece-content">
-            <span class="piece-number-display">4</span>
-          </div>
-        </div>
+      <div class="pieces-container" id="pieces-container">
+        <!-- Peças serão geradas dinamicamente -->
       </div>
     </div>
 
     <!-- Mensagem de Status -->
     <div class="status-message" id="status-message"></div>
+
+    <!-- Container da imagem final revelada -->
+    <div class="final-reveal" id="final-reveal">
+      <img src="../imagens/bebes.png" alt="André e Pedro" id="final-image">
+    </div>
   </div>
 
   <script src="script.js"></script>

@@ -170,7 +170,7 @@ function finalizarSelecao() {
     atualizarStats();
 
     if (palavrasEncontradas.length === 4) {
-      alert("Você encontrou as 4 primeiras palavras! Agora descubra a 😶‍🌫️PALAVRA SECRETA😶‍🌫️ para conquistar a peça final!");
+      alert("Você encontrou as 4 primeiras palavras! \nAgora descubra a 😶‍🌫️PALAVRA SECRETA😶‍🌫️ para conquistar a peça final!");
       alert("DICA: A palavra secreta é a pessoa que possi todas essas características mencionadas nas palavras anteriores.");
     }
 
@@ -205,7 +205,7 @@ function mostrarVitoria() {
 
   // Redirecionar para página da peça 4 após 2 segundos
   setTimeout(() => {
-    window.location.href = '../mensagem/index.html';
+    window.location.href = '../pecas/peca-conquistada.html?peca=4';
   }, 2000);
 }
 
