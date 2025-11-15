@@ -8,7 +8,7 @@
 
 body {
   font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+background: linear-gradient(135deg, #5170ff 0%, #1800ad 100%);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -292,8 +292,8 @@ h1 {
 }
 
 .message.win {
-  background: rgba(76, 175, 80, 0.3);
-  color: #4CAF50;
+  background: rgba(31, 165, 35, 0.582);
+  color: #ffffff;
   border: 2px solid rgba(76, 175, 80, 0.5);
   animation: pulseWin 1s ease-in-out infinite;
 }
